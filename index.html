@@ -4,24 +4,26 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Budget">
-<meta name="theme-color" content="#0a0a0a">
+<meta name="theme-color" content="#f8f5f2">
 <title>Budget</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap');
 :root {
-  --bg: #0a0a0a; --surface: #141414; --surface2: #1e1e1e;
-  --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.14);
-  --text: #f0f0f0; --muted: #666; --muted2: #888;
-  --accent: #c8f066; --accent-dim: rgba(200,240,102,0.12);
-  --red: #ff5f5f; --red-dim: rgba(255,95,95,0.12);
-  --amber: #ffb347; --amber-dim: rgba(255,179,71,0.1);
+  --bg: #f8f5f2; --surface: #ffffff; --surface2: #f0ebe8;
+  --border: rgba(0,0,0,0.08); --border2: rgba(0,0,0,0.14);
+  --text: #1a1018; --muted: #9e8e96; --muted2: #7a6a72;
+  --accent: #7B1F3A; --accent-dim: rgba(123,31,58,0.08);
+  --blue: #1C3F6E; --blue-dim: rgba(28,63,110,0.08);
+  --red: #c0392b; --red-dim: rgba(192,57,43,0.08);
+  --amber: #b35c00; --amber-dim: rgba(179,92,0,0.09);
+  --green: #1a6b3c; --green-dim: rgba(26,107,60,0.08);
   --safe: env(safe-area-inset-bottom, 0px);
 }
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100dvh; overflow-x: hidden; padding-bottom: calc(80px + var(--safe)); }
-.nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(10,10,10,0.92); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-top: 1px solid var(--border); display: flex; padding-bottom: var(--safe); z-index: 100; }
+.nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(248,245,242,0.95); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-top: 1px solid var(--border); display: flex; padding-bottom: var(--safe); z-index: 100; }
 .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 12px 0 10px; background: none; border: none; color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 10px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; cursor: pointer; transition: color 0.15s; }
 .nav-btn.active { color: var(--accent); }
 .nav-icon { font-size: 18px; line-height: 1; }
@@ -32,14 +34,14 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .month-bar { display: flex; gap: 8px; padding: 0 20px 16px; overflow-x: auto; scrollbar-width: none; }
 .month-bar::-webkit-scrollbar { display: none; }
 .month-chip { flex-shrink: 0; padding: 6px 14px; border-radius: 999px; border: 1px solid var(--border2); background: transparent; color: var(--muted2); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; }
-.month-chip.active { background: var(--accent); border-color: var(--accent); color: #0a0a0a; }
+.month-chip.active { background: var(--accent); border-color: var(--accent); color: #fff; }
 .summary { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 20px 20px; }
 .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 14px 16px; }
-.card.accent-card { background: var(--accent-dim); border-color: rgba(200,240,102,0.2); }
-.card.danger-card { background: var(--red-dim); border-color: rgba(255,95,95,0.2); }
+.card.accent-card { background: var(--green-dim); border-color: rgba(26,107,60,0.15); }
+.card.danger-card { background: var(--red-dim); border-color: rgba(192,57,43,0.15); }
 .card-label { font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
 .card-value { font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 500; color: var(--text); }
-.card-value.green { color: var(--accent); }
+.card-value.green { color: var(--green); }
 .card-value.red { color: var(--red); }
 .section { margin: 0 20px 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
 .section-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; cursor: pointer; user-select: none; }
@@ -62,14 +64,14 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .item-actual-input:focus { outline: none; border-color: var(--accent); }
 .diff-pill { font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 500; padding: 2px 7px; border-radius: 999px; min-width: 52px; text-align: center; }
 .diff-over { background: var(--red-dim); color: var(--red); }
-.diff-under { background: var(--accent-dim); color: var(--accent); }
+.diff-under { background: var(--green-dim); color: var(--green); }
 .diff-zero { background: var(--surface2); color: var(--muted); }
 .add-row { display: flex; gap: 8px; padding: 10px 16px; border-top: 1px solid var(--border); }
 .add-label-input { flex: 1; font-family: 'DM Sans', sans-serif; font-size: 13px; background: var(--surface2); border: 1px solid var(--border2); border-radius: 8px; color: var(--text); padding: 6px 10px; }
 .add-label-input:focus { outline: none; border-color: var(--accent); }
 .add-amt-input { font-family: 'DM Mono', monospace; font-size: 13px; background: var(--surface2); border: 1px solid var(--border2); border-radius: 8px; color: var(--text); padding: 6px 8px; width: 64px; text-align: right; }
 .add-amt-input:focus { outline: none; border-color: var(--accent); }
-.add-btn-icon { width: 32px; height: 32px; border-radius: 8px; background: var(--accent); border: none; color: #0a0a0a; font-size: 18px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.add-btn-icon { width: 32px; height: 32px; border-radius: 8px; background: var(--accent); border: none; color: #fff; font-size: 18px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .del-btn { background: none; border: none; color: var(--muted); font-size: 14px; cursor: pointer; padding: 2px 4px; flex-shrink: 0; }
 .del-btn:active { color: var(--red); }
 .sub-row { display: flex; align-items: center; gap: 12px; padding: 13px 16px; border-bottom: 1px solid var(--border); }
@@ -80,34 +82,34 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .sub-name-note { font-size: 11px; color: var(--muted); margin-top: 1px; }
 .sub-amt { font-family: 'DM Mono', monospace; font-size: 14px; color: var(--text); min-width: 52px; text-align: right; }
 .status-pill { font-size: 10px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; padding: 4px 9px; border-radius: 999px; cursor: pointer; border: none; font-family: 'DM Sans', sans-serif; }
-.pill-keep { background: var(--accent-dim); color: var(--accent); }
+.pill-keep { background: var(--green-dim); color: var(--green); }
 .pill-cancel { background: var(--red-dim); color: var(--red); }
 .pill-audit { background: var(--amber-dim); color: var(--amber); }
 .page { display: none; }
 .page.active { display: block; }
 .view-tabs { display: flex; margin: 0 20px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 3px; }
 .view-tab { flex: 1; padding: 8px; border-radius: 9px; border: none; background: transparent; color: var(--muted2); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; }
-.view-tab.active { background: var(--surface2); color: var(--text); }
+.view-tab.active { background: var(--accent); color: #fff; }
 .bills-section-label { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); padding: 20px 20px 8px; }
 .bill-row { display: flex; align-items: center; gap: 12px; padding: 13px 16px; border-bottom: 1px solid var(--border); }
 .bill-row:last-child { border-bottom: none; }
 .bill-day { font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 500; min-width: 36px; text-align: center; }
 .bill-day.today { color: var(--accent); }
 .bill-day.overdue { color: var(--red); }
-.bill-day.upcoming { color: var(--text); }
+.bill-day.upcoming { color: var(--blue); }
 .bill-day.future { color: var(--muted2); }
 .bill-info { flex: 1; }
 .bill-name { font-size: 14px; font-weight: 500; color: var(--text); }
 .bill-status { font-size: 11px; color: var(--muted); margin-top: 2px; }
 .bill-amt { font-family: 'DM Mono', monospace; font-size: 14px; font-weight: 500; text-align: right; }
 .bill-amt.overdue { color: var(--red); }
-.bill-amt.upcoming { color: var(--amber); }
-.bill-amt.paid { color: var(--accent); }
+.bill-amt.upcoming { color: var(--blue); }
+.bill-amt.paid { color: var(--green); }
 .bill-amt.future { color: var(--muted2); }
 .bill-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-.upcoming-total { margin: 0 20px 12px; background: var(--amber-dim); border: 1px solid rgba(255,179,71,0.2); border-radius: 16px; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; }
-.upcoming-label { font-size: 13px; color: var(--amber); }
-.upcoming-value { font-family: 'DM Mono', monospace; font-size: 18px; font-weight: 500; color: var(--amber); }
+.upcoming-total { margin: 0 20px 12px; background: var(--blue-dim); border: 1px solid rgba(28,63,110,0.15); border-radius: 16px; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; }
+.upcoming-label { font-size: 13px; color: var(--blue); }
+.upcoming-value { font-family: 'DM Mono', monospace; font-size: 18px; font-weight: 500; color: var(--blue); }
 </style>
 </head>
 <body>
@@ -151,46 +153,46 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 const INCOME=4716;
 const MONTHS=['May 2026','Jun 2026','Jul 2026','Aug 2026','Sep 2026','Oct 2026','Nov 2026'];
 const ALL_BILLS=[
-  {name:"Rent",day:1,amt:650,color:"#c8f066",cat:"Housing"},
-  {name:"School loan",day:1,amt:100,color:"#ff7f7f",cat:"Debt"},
-  {name:"Claude.ai",day:2,amt:21.60,color:"#c8f066",cat:"Subscription"},
-  {name:"PlayStation",day:7,amt:10.78,color:"#60b4ff",cat:"Subscription"},
-  {name:"Prime Video",day:8,amt:15.11,color:"#ffb347",cat:"Subscription"},
-  {name:"Spotify",day:8,amt:14.03,color:"#a8e6a3",cat:"Subscription"},
-  {name:"Toledo Blade",day:13,amt:12.99,color:"#888",cat:"Subscription"},
-  {name:"Progressive (auto insurance)",day:14,amt:122,color:"#ff7f7f",cat:"Insurance"},
-  {name:"Verizon",day:15,amt:110,color:"#7B8CDE",cat:"Utility"},
-  {name:"Planet Fitness",day:17,amt:27.05,color:"#5DCAA5",cat:"Subscription"},
-  {name:"AAA",day:20,amt:7.50,color:"#ffb347",cat:"Subscription"},
-  {name:"Bronco Sport (Bridgecrest)",day:12,amt:444,color:"#7B8CDE",cat:"Transportation"},
-  {name:"Medical debt plan",day:28,amt:50,color:"#ff7f7f",cat:"Debt"},
-  {name:"Netflix",day:27,amt:8.63,color:"#ff7f7f",cat:"Subscription"},
-  {name:"YouTube TV",day:29,amt:89.42,color:"#ff7f7f",cat:"Subscription"},
-  {name:"Apple subscriptions",day:29,amt:14.03,color:"#888",cat:"Subscription"},
+  {name:"Rent",day:1,amt:650,color:"#7B1F3A",cat:"Housing"},
+  {name:"School loan",day:1,amt:100,color:"#c0392b",cat:"Debt"},
+  {name:"Claude.ai",day:2,amt:21.60,color:"#1C3F6E",cat:"Subscription"},
+  {name:"PlayStation",day:7,amt:10.78,color:"#1C3F6E",cat:"Subscription"},
+  {name:"Prime Video",day:8,amt:15.11,color:"#b35c00",cat:"Subscription"},
+  {name:"Spotify",day:8,amt:14.03,color:"#1a6b3c",cat:"Subscription"},
+  {name:"Toledo Blade",day:13,amt:12.99,color:"#7a6a72",cat:"Subscription"},
+  {name:"Progressive (auto insurance)",day:14,amt:122,color:"#c0392b",cat:"Insurance"},
+  {name:"Verizon",day:15,amt:110,color:"#1C3F6E",cat:"Utility"},
+  {name:"Planet Fitness",day:17,amt:27.05,color:"#1a6b3c",cat:"Subscription"},
+  {name:"AAA",day:20,amt:7.50,color:"#b35c00",cat:"Subscription"},
+  {name:"Bronco Sport (Bridgecrest)",day:12,amt:444,color:"#1C3F6E",cat:"Transportation"},
+  {name:"Medical debt plan",day:28,amt:50,color:"#c0392b",cat:"Debt"},
+  {name:"Netflix",day:27,amt:8.63,color:"#c0392b",cat:"Subscription"},
+  {name:"YouTube TV",day:29,amt:89.42,color:"#7B1F3A",cat:"Subscription"},
+  {name:"Apple subscriptions",day:29,amt:14.03,color:"#7a6a72",cat:"Subscription"},
 ];
 const DEFAULT_CATS=[
-  {name:"Housing",color:"#c8f066",items:[{label:"Rent (Old West End)",budget:650}]},
-  {name:"Transportation",color:"#7B8CDE",items:[{label:"Bronco Sport (Bridgecrest)",budget:444},{label:"Gas",budget:150},{label:"Auto insurance (Progressive)",budget:122},{label:"EZPass / tolls",budget:25}]},
-  {name:"Utilities & Subscriptions",color:"#60b4ff",items:[{label:"Verizon",budget:110},{label:"YouTube TV",budget:90},{label:"Planet Fitness",budget:27},{label:"Claude.ai",budget:22},{label:"Prime Video",budget:15},{label:"Apple subscriptions",budget:14},{label:"Spotify",budget:14},{label:"Netflix",budget:9},{label:"PlayStation",budget:11},{label:"Toledo Blade",budget:13},{label:"AAA (monthly)",budget:8}]},
-  {name:"Debt Payments",color:"#ff7f7f",items:[{label:"Federal student loans (IDR)",budget:0},{label:"School loan (delinquent)",budget:100},{label:"Medical debt plan",budget:50}]},
-  {name:"Food & Groceries",color:"#a8e6a3",items:[{label:"Groceries",budget:300},{label:"Dining out / restaurants",budget:200},{label:"Fast food",budget:100},{label:"Coffee",budget:50}]},
-  {name:"Personal & Health",color:"#5DCAA5",items:[{label:"Medical (Willow Center)",budget:90},{label:"Personal care / pharmacy",budget:30},{label:"Misc",budget:30}]},
-  {name:"Entertainment",color:"#b39ddb",items:[{label:"Mud Hens / Walleye / events",budget:50},{label:"Other entertainment",budget:30}]},
-  {name:"Savings / Investing",color:"#ffb347",items:[{label:"Emergency fund",budget:100},{label:"Investments",budget:200}]},
+  {name:"Housing",color:"#7B1F3A",items:[{label:"Rent (Old West End)",budget:650}]},
+  {name:"Transportation",color:"#1C3F6E",items:[{label:"Bronco Sport (Bridgecrest)",budget:444},{label:"Gas",budget:150},{label:"Auto insurance (Progressive)",budget:122},{label:"EZPass / tolls",budget:25}]},
+  {name:"Utilities & Subscriptions",color:"#1C3F6E",items:[{label:"Verizon",budget:110},{label:"YouTube TV",budget:90},{label:"Planet Fitness",budget:27},{label:"Claude.ai",budget:22},{label:"Prime Video",budget:15},{label:"Apple subscriptions",budget:14},{label:"Spotify",budget:14},{label:"Netflix",budget:9},{label:"PlayStation",budget:11},{label:"Toledo Blade",budget:13},{label:"AAA (monthly)",budget:8}]},
+  {name:"Debt Payments",color:"#c0392b",items:[{label:"Federal student loans (IDR)",budget:0},{label:"School loan (delinquent)",budget:100},{label:"Medical debt plan",budget:50}]},
+  {name:"Food & Groceries",color:"#1a6b3c",items:[{label:"Groceries",budget:300},{label:"Dining out / restaurants",budget:200},{label:"Fast food",budget:100},{label:"Coffee",budget:50}]},
+  {name:"Personal & Health",color:"#7B1F3A",items:[{label:"Medical (Willow Center)",budget:90},{label:"Personal care / pharmacy",budget:30},{label:"Misc",budget:30}]},
+  {name:"Entertainment",color:"#1C3F6E",items:[{label:"Mud Hens / Walleye / events",budget:50},{label:"Other entertainment",budget:30}]},
+  {name:"Savings / Investing",color:"#1a6b3c",items:[{label:"Emergency fund",budget:100},{label:"Investments",budget:200}]},
 ];
 const DEFAULT_SUBS=[
-  {name:"Verizon",amt:110.00,color:"#7B8CDE",status:"keep",note:"Phone"},
-  {name:"YouTube TV",amt:89.42,color:"#ff7f7f",status:"keep",note:"Streaming TV"},
-  {name:"Planet Fitness",amt:27.05,color:"#5DCAA5",status:"keep",note:"Gym"},
-  {name:"Claude.ai",amt:21.60,color:"#c8f066",status:"keep",note:"AI subscription"},
-  {name:"FlexJobs",amt:23.95,color:"#ff5f5f",status:"cancel",note:"Job search — no longer needed"},
-  {name:"Prime Video",amt:15.11,color:"#ffb347",status:"keep",note:"Streaming"},
-  {name:"Apple subscriptions",amt:14.03,color:"#888",status:"audit",note:"Two charges in April — audit in Apple ID"},
-  {name:"Spotify",amt:14.03,color:"#a8e6a3",status:"keep",note:"Music"},
-  {name:"Netflix",amt:8.63,color:"#ff7f7f",status:"keep",note:"Streaming"},
-  {name:"PlayStation",amt:10.78,color:"#60b4ff",status:"keep",note:"Gaming"},
-  {name:"Toledo Blade",amt:12.99,color:"#888",status:"keep",note:"Local news"},
-  {name:"AAA",amt:7.50,color:"#ffb347",status:"keep",note:"Annual membership"},
+  {name:"Verizon",amt:110.00,color:"#1C3F6E",status:"keep",note:"Phone"},
+  {name:"YouTube TV",amt:89.42,color:"#7B1F3A",status:"keep",note:"Streaming TV"},
+  {name:"Planet Fitness",amt:27.05,color:"#1a6b3c",status:"keep",note:"Gym"},
+  {name:"Claude.ai",amt:21.60,color:"#1C3F6E",status:"keep",note:"AI subscription"},
+  {name:"FlexJobs",amt:23.95,color:"#c0392b",status:"cancel",note:"Job search — no longer needed"},
+  {name:"Prime Video",amt:15.11,color:"#b35c00",status:"keep",note:"Streaming"},
+  {name:"Apple subscriptions",amt:14.03,color:"#7a6a72",status:"audit",note:"Two charges in April — audit in Apple ID"},
+  {name:"Spotify",amt:14.03,color:"#1a6b3c",status:"keep",note:"Music"},
+  {name:"Netflix",amt:8.63,color:"#c0392b",status:"keep",note:"Streaming"},
+  {name:"PlayStation",amt:10.78,color:"#1C3F6E",status:"keep",note:"Gaming"},
+  {name:"Toledo Blade",amt:12.99,color:"#7a6a72",status:"keep",note:"Local news"},
+  {name:"AAA",amt:7.50,color:"#b35c00",status:"keep",note:"Annual membership"},
 ];
 function load(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch{return d;}}
 function save(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch{}}
@@ -224,7 +226,7 @@ function renderBudget(){
       if(sa){if(diff===0||item.budget===0)dh=`<span class="diff-pill diff-zero">—</span>`;else if(diff>0)dh=`<span class="diff-pill diff-under">-${fmt(diff)}</span>`;else dh=`<span class="diff-pill diff-over">+${fmt(Math.abs(diff))}</span>`;}
       return`<div class="item-row"><button class="del-btn" onclick="delItem(${ci},${ii})">✕</button><span class="item-label">${item.label}</span><input class="item-budget" type="number" value="${item.budget}" onchange="setBudget(${ci},${ii},this.value)" style="${sa?'':'display:none'}" /><span class="item-budget" style="${sa?'display:none':''}">$${item.budget}</span>${sa?`<input class="item-actual-input" type="number" inputmode="decimal" value="${actual||''}" placeholder="0" onchange="setActual(${ci},${ii},this.value)" />`:''}${dh}</div>`;
     }).join('');
-    sec.innerHTML=`<div class="section-head" onclick="toggleSection(${ci})"><div class="section-left"><div class="section-dot" style="background:${cat.color}"></div><span class="section-name">${cat.name}</span></div><div class="section-right"><span class="section-amt">${fmt(sa?at:bt)}</span><span class="section-chevron ${isOpen?'open':''}">▾</span></div></div><div class="progress-track"><div class="progress-fill" style="width:${pct}%;background:${over?'#ff5f5f':cat.color};"></div></div><div class="section-body ${isOpen?'open':''}">${rows}<div class="add-row"><input class="add-label-input" id="al-${ci}" placeholder="Add item..." /><input class="add-amt-input" id="aa-${ci}" type="number" inputmode="decimal" placeholder="$0" /><button class="add-btn-icon" onclick="addItem(${ci})">+</button></div></div>`;
+    sec.innerHTML=`<div class="section-head" onclick="toggleSection(${ci})"><div class="section-left"><div class="section-dot" style="background:${cat.color}"></div><span class="section-name">${cat.name}</span></div><div class="section-right"><span class="section-amt">${fmt(sa?at:bt)}</span><span class="section-chevron ${isOpen?'open':''}">▾</span></div></div><div class="progress-track"><div class="progress-fill" style="width:${pct}%;background:${over?'#c0392b':cat.color};"></div></div><div class="section-body ${isOpen?'open':''}">${rows}<div class="add-row"><input class="add-label-input" id="al-${ci}" placeholder="Add item..." /><input class="add-amt-input" id="aa-${ci}" type="number" inputmode="decimal" placeholder="$0" /><button class="add-btn-icon" onclick="addItem(${ci})">+</button></div></div>`;
     container.appendChild(sec);
   });
 }
@@ -259,7 +261,7 @@ function renderBills(){
   }
   if(paid.length){
     html+=`<div class="bills-section-label">Paid this month</div><div class="section" style="margin:0 20px 12px;">`;
-    html+=paid.map(bill=>`<div class="bill-row"><div class="bill-day future">${bill.day}</div><div class="bill-dot" style="background:${bill.color}"></div><div class="bill-info"><div class="bill-name" style="color:var(--muted2)">${bill.name}</div><div class="bill-status">Paid · ${bill.cat}</div></div><div class="bill-amt paid">${fmtDec(bill.amt)}</div><button onclick="toggleBillPaid('${currentMonthStr}','${bill.name}')" style="background:var(--accent-dim);border:1px solid rgba(200,240,102,0.2);border-radius:8px;color:var(--accent);font-size:11px;padding:4px 8px;cursor:pointer;font-family:'DM Sans',sans-serif;flex-shrink:0;">✓ Paid</button></div>`).join('');
+    html+=paid.map(bill=>`<div class="bill-row"><div class="bill-day future">${bill.day}</div><div class="bill-dot" style="background:${bill.color}"></div><div class="bill-info"><div class="bill-name" style="color:var(--muted2)">${bill.name}</div><div class="bill-status">Paid · ${bill.cat}</div></div><div class="bill-amt paid">${fmtDec(bill.amt)}</div><button onclick="toggleBillPaid('${currentMonthStr}','${bill.name}')" style="background:var(--green-dim);border:1px solid rgba(26,107,60,0.15);border-radius:8px;color:var(--green);font-size:11px;padding:4px 8px;cursor:pointer;font-family:'DM Sans',sans-serif;flex-shrink:0;">✓ Paid</button></div>`).join('');
     html+=`</div>`;
   }
   document.getElementById('bills-list').innerHTML=html;
