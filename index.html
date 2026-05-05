@@ -91,4 +91,187 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .bills-section-label { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); padding: 20px 20px 8px; }
 .bill-row { display: flex; align-items: center; gap: 12px; padding: 13px 16px; border-bottom: 1px solid var(--border); }
 .bill-row:last-child { border-bottom: none; }
-.bill-day { font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 500; mi
+.bill-day { font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 500; min-width: 36px; text-align: center; }
+.bill-day.today { color: var(--accent); }
+.bill-day.overdue { color: var(--red); }
+.bill-day.upcoming { color: var(--text); }
+.bill-day.future { color: var(--muted2); }
+.bill-info { flex: 1; }
+.bill-name { font-size: 14px; font-weight: 500; color: var(--text); }
+.bill-status { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.bill-amt { font-family: 'DM Mono', monospace; font-size: 14px; font-weight: 500; text-align: right; }
+.bill-amt.overdue { color: var(--red); }
+.bill-amt.upcoming { color: var(--amber); }
+.bill-amt.paid { color: var(--accent); }
+.bill-amt.future { color: var(--muted2); }
+.bill-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.upcoming-total { margin: 0 20px 12px; background: var(--amber-dim); border: 1px solid rgba(255,179,71,0.2); border-radius: 16px; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; }
+.upcoming-label { font-size: 13px; color: var(--amber); }
+.upcoming-value { font-family: 'DM Mono', monospace; font-size: 18px; font-weight: 500; color: var(--amber); }
+</style>
+</head>
+<body>
+<div class="page active" id="page-budget">
+  <div class="header">
+    <div class="header-label">Jared · Campaign</div>
+    <div class="header-title">Budget</div>
+    <div class="header-sub">$4,716 / month net</div>
+  </div>
+  <div class="month-bar" id="month-bar"></div>
+  <div class="view-tabs">
+    <button class="view-tab active" onclick="switchView('budget')">Budget</button>
+    <button class="view-tab" onclick="switchView('actual')">Track spending</button>
+  </div>
+  <div class="summary" id="summary"></div>
+  <div id="categories"></div>
+</div>
+<div class="page" id="page-bills">
+  <div class="header">
+    <div class="header-label">Due dates</div>
+    <div class="header-title">Bills</div>
+    <div class="header-sub" id="bills-header-sub"></div>
+  </div>
+  <div id="bills-upcoming-banner"></div>
+  <div id="bills-list"></div>
+</div>
+<div class="page" id="page-subs">
+  <div class="header">
+    <div class="header-label">Monthly recurring</div>
+    <div class="header-title">Subscriptions</div>
+  </div>
+  <div class="summary" id="subs-summary"></div>
+  <div class="section" id="subs-list" style="margin:0 20px 12px;"></div>
+</div>
+<nav class="nav">
+  <button class="nav-btn active" onclick="showPage('budget')" id="nav-budget"><span class="nav-icon">◎</span>Budget</button>
+  <button class="nav-btn" onclick="showPage('bills')" id="nav-bills"><span class="nav-icon">📅</span>Bills</button>
+  <button class="nav-btn" onclick="showPage('subs')" id="nav-subs"><span class="nav-icon">↻</span>Subs</button>
+</nav>
+<script>
+const INCOME=4716;
+const MONTHS=['May 2026','Jun 2026','Jul 2026','Aug 2026','Sep 2026','Oct 2026','Nov 2026'];
+const ALL_BILLS=[
+  {name:"Rent",day:1,amt:650,color:"#c8f066",cat:"Housing"},
+  {name:"School loan",day:1,amt:100,color:"#ff7f7f",cat:"Debt"},
+  {name:"Claude.ai",day:2,amt:21.60,color:"#c8f066",cat:"Subscription"},
+  {name:"PlayStation",day:7,amt:10.78,color:"#60b4ff",cat:"Subscription"},
+  {name:"Prime Video",day:8,amt:15.11,color:"#ffb347",cat:"Subscription"},
+  {name:"Spotify",day:8,amt:14.03,color:"#a8e6a3",cat:"Subscription"},
+  {name:"Toledo Blade",day:13,amt:12.99,color:"#888",cat:"Subscription"},
+  {name:"Progressive (auto insurance)",day:14,amt:122,color:"#ff7f7f",cat:"Insurance"},
+  {name:"Verizon",day:15,amt:110,color:"#7B8CDE",cat:"Utility"},
+  {name:"Planet Fitness",day:17,amt:27.05,color:"#5DCAA5",cat:"Subscription"},
+  {name:"AAA",day:20,amt:7.50,color:"#ffb347",cat:"Subscription"},
+  {name:"Bronco Sport (Bridgecrest)",day:12,amt:444,color:"#7B8CDE",cat:"Transportation"},
+  {name:"Medical debt plan",day:28,amt:50,color:"#ff7f7f",cat:"Debt"},
+  {name:"Netflix",day:27,amt:8.63,color:"#ff7f7f",cat:"Subscription"},
+  {name:"YouTube TV",day:29,amt:89.42,color:"#ff7f7f",cat:"Subscription"},
+  {name:"Apple subscriptions",day:29,amt:14.03,color:"#888",cat:"Subscription"},
+];
+const DEFAULT_CATS=[
+  {name:"Housing",color:"#c8f066",items:[{label:"Rent (Old West End)",budget:650}]},
+  {name:"Transportation",color:"#7B8CDE",items:[{label:"Bronco Sport (Bridgecrest)",budget:444},{label:"Gas",budget:150},{label:"Auto insurance (Progressive)",budget:122},{label:"EZPass / tolls",budget:25}]},
+  {name:"Utilities & Subscriptions",color:"#60b4ff",items:[{label:"Verizon",budget:110},{label:"YouTube TV",budget:90},{label:"Planet Fitness",budget:27},{label:"Claude.ai",budget:22},{label:"Prime Video",budget:15},{label:"Apple subscriptions",budget:14},{label:"Spotify",budget:14},{label:"Netflix",budget:9},{label:"PlayStation",budget:11},{label:"Toledo Blade",budget:13},{label:"AAA (monthly)",budget:8}]},
+  {name:"Debt Payments",color:"#ff7f7f",items:[{label:"Federal student loans (IDR)",budget:0},{label:"School loan (delinquent)",budget:100},{label:"Medical debt plan",budget:50}]},
+  {name:"Food & Groceries",color:"#a8e6a3",items:[{label:"Groceries",budget:300},{label:"Dining out / restaurants",budget:200},{label:"Fast food",budget:100},{label:"Coffee",budget:50}]},
+  {name:"Personal & Health",color:"#5DCAA5",items:[{label:"Medical (Willow Center)",budget:90},{label:"Personal care / pharmacy",budget:30},{label:"Misc",budget:30}]},
+  {name:"Entertainment",color:"#b39ddb",items:[{label:"Mud Hens / Walleye / events",budget:50},{label:"Other entertainment",budget:30}]},
+  {name:"Savings / Investing",color:"#ffb347",items:[{label:"Emergency fund",budget:100},{label:"Investments",budget:200}]},
+];
+const DEFAULT_SUBS=[
+  {name:"Verizon",amt:110.00,color:"#7B8CDE",status:"keep",note:"Phone"},
+  {name:"YouTube TV",amt:89.42,color:"#ff7f7f",status:"keep",note:"Streaming TV"},
+  {name:"Planet Fitness",amt:27.05,color:"#5DCAA5",status:"keep",note:"Gym"},
+  {name:"Claude.ai",amt:21.60,color:"#c8f066",status:"keep",note:"AI subscription"},
+  {name:"FlexJobs",amt:23.95,color:"#ff5f5f",status:"cancel",note:"Job search — no longer needed"},
+  {name:"Prime Video",amt:15.11,color:"#ffb347",status:"keep",note:"Streaming"},
+  {name:"Apple subscriptions",amt:14.03,color:"#888",status:"audit",note:"Two charges in April — audit in Apple ID"},
+  {name:"Spotify",amt:14.03,color:"#a8e6a3",status:"keep",note:"Music"},
+  {name:"Netflix",amt:8.63,color:"#ff7f7f",status:"keep",note:"Streaming"},
+  {name:"PlayStation",amt:10.78,color:"#60b4ff",status:"keep",note:"Gaming"},
+  {name:"Toledo Blade",amt:12.99,color:"#888",status:"keep",note:"Local news"},
+  {name:"AAA",amt:7.50,color:"#ffb347",status:"keep",note:"Annual membership"},
+];
+function load(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch{return d;}}
+function save(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch{}}
+let state={month:load('month','May 2026'),view:load('view','budget'),cats:load('cats',DEFAULT_CATS),actuals:load('actuals',{}),subs:load('subs',DEFAULT_SUBS),openSections:load('openSections',{}),paidBills:load('paidBills',{})};
+function persist(){save('month',state.month);save('view',state.view);save('cats',state.cats);save('actuals',state.actuals);save('subs',state.subs);save('openSections',state.openSections);save('paidBills',state.paidBills);}
+function actualKey(m,ci,ii){return`${m}__${ci}__${ii}`;}
+function getActual(ci,ii){return state.actuals[actualKey(state.month,ci,ii)]||0;}
+function billKey(month,name){return`${month}__${name}`;}
+function isBillPaid(month,name){return state.paidBills[billKey(month,name)]||false;}
+function toggleBillPaid(month,name){state.paidBills[billKey(month,name)]=!state.paidBills[billKey(month,name)];persist();renderBills();}
+function fmt(n){return'$'+Math.round(Math.abs(n)).toLocaleString();}
+function fmtDec(n){return'$'+Math.abs(n).toFixed(2);}
+function showPage(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById('page-'+id).classList.add('active');document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));document.getElementById('nav-'+id).classList.add('active');if(id==='subs')renderSubs();if(id==='bills')renderBills();}
+function switchView(v){state.view=v;persist();document.querySelectorAll('.view-tab').forEach((t,i)=>t.classList.toggle('active',(i===0&&v==='budget')||(i===1&&v==='actual')));renderBudget();}
+function renderMonthBar(){document.getElementById('month-bar').innerHTML=MONTHS.map(m=>`<button class="month-chip ${m===state.month?'active':''}" onclick="selectMonth('${m}')">${m}</button>`).join('');}
+function selectMonth(m){state.month=m;persist();renderMonthBar();renderBudget();}
+function renderSummary(){
+  const tb=state.cats.reduce((s,cat)=>s+cat.items.reduce((ss,i)=>ss+i.budget,0),0);
+  const ts=state.cats.reduce((s,cat,ci)=>s+cat.items.reduce((ss,_,ii)=>ss+getActual(ci,ii),0),0);
+  const base=state.view==='actual'?ts:tb;const rem=INCOME-base;const over=rem<0;
+  document.getElementById('summary').innerHTML=`<div class="card"><div class="card-label">Income</div><div class="card-value green">${fmt(INCOME)}</div></div><div class="card"><div class="card-label">Budgeted</div><div class="card-value">${fmt(tb)}</div></div>${state.view==='actual'?`<div class="card"><div class="card-label">Spent</div><div class="card-value">${fmt(ts)}</div></div>`:''}<div class="card ${over?'danger-card':'accent-card'}" ${state.view==='budget'?'style="grid-column:span 1;"':''}><div class="card-label">Remaining</div><div class="card-value ${over?'red':'green'}">${over?'-':''}${fmt(Math.abs(rem))}</div></div>`;
+}
+function renderBudget(){
+  renderSummary();const container=document.getElementById('categories');container.innerHTML='';
+  state.cats.forEach((cat,ci)=>{
+    const bt=cat.items.reduce((s,i)=>s+i.budget,0);const at=cat.items.reduce((s,_,ii)=>s+getActual(ci,ii),0);
+    const pct=bt>0?Math.min(at/bt*100,100):0;const over=at>bt&&bt>0;const isOpen=state.openSections[ci]!==false;const sa=state.view==='actual';
+    const sec=document.createElement('div');sec.className='section';
+    const rows=cat.items.map((item,ii)=>{
+      const actual=getActual(ci,ii);const diff=item.budget-actual;let dh='';
+      if(sa){if(diff===0||item.budget===0)dh=`<span class="diff-pill diff-zero">—</span>`;else if(diff>0)dh=`<span class="diff-pill diff-under">-${fmt(diff)}</span>`;else dh=`<span class="diff-pill diff-over">+${fmt(Math.abs(diff))}</span>`;}
+      return`<div class="item-row"><button class="del-btn" onclick="delItem(${ci},${ii})">✕</button><span class="item-label">${item.label}</span><input class="item-budget" type="number" value="${item.budget}" onchange="setBudget(${ci},${ii},this.value)" style="${sa?'':'display:none'}" /><span class="item-budget" style="${sa?'display:none':''}">$${item.budget}</span>${sa?`<input class="item-actual-input" type="number" inputmode="decimal" value="${actual||''}" placeholder="0" onchange="setActual(${ci},${ii},this.value)" />`:''}${dh}</div>`;
+    }).join('');
+    sec.innerHTML=`<div class="section-head" onclick="toggleSection(${ci})"><div class="section-left"><div class="section-dot" style="background:${cat.color}"></div><span class="section-name">${cat.name}</span></div><div class="section-right"><span class="section-amt">${fmt(sa?at:bt)}</span><span class="section-chevron ${isOpen?'open':''}">▾</span></div></div><div class="progress-track"><div class="progress-fill" style="width:${pct}%;background:${over?'#ff5f5f':cat.color};"></div></div><div class="section-body ${isOpen?'open':''}">${rows}<div class="add-row"><input class="add-label-input" id="al-${ci}" placeholder="Add item..." /><input class="add-amt-input" id="aa-${ci}" type="number" inputmode="decimal" placeholder="$0" /><button class="add-btn-icon" onclick="addItem(${ci})">+</button></div></div>`;
+    container.appendChild(sec);
+  });
+}
+function toggleSection(ci){state.openSections[ci]=state.openSections[ci]===false?true:false;persist();renderBudget();}
+function setBudget(ci,ii,v){state.cats[ci].items[ii].budget=parseFloat(v)||0;persist();renderSummary();}
+function setActual(ci,ii,v){state.actuals[actualKey(state.month,ci,ii)]=parseFloat(v)||0;persist();renderSummary();}
+function delItem(ci,ii){state.cats[ci].items.splice(ii,1);persist();renderBudget();}
+function addItem(ci){const label=document.getElementById(`al-${ci}`).value.trim();const amt=parseFloat(document.getElementById(`aa-${ci}`).value)||0;if(!label)return;state.cats[ci].items.push({label,budget:amt});persist();renderBudget();}
+function ord(n){return n+(n===1?'st':n===2?'nd':n===3?'rd':'th');}
+function renderBills(){
+  const today=new Date();const todayDay=today.getDate();
+  const monthNames=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const currentMonthStr=`${monthNames[today.getMonth()]} ${today.getFullYear()}`;
+  document.getElementById('bills-header-sub').textContent=currentMonthStr;
+  const sorted=[...ALL_BILLS].sort((a,b)=>a.day-b.day);
+  const upcomingAmt=sorted.filter(b=>!isBillPaid(currentMonthStr,b.name)&&b.day>=todayDay&&b.day<=todayDay+7).reduce((s,b)=>s+b.amt,0);
+  const banner=document.getElementById('bills-upcoming-banner');
+  banner.innerHTML=upcomingAmt>0?`<div class="upcoming-total"><span class="upcoming-label">Due in next 7 days</span><span class="upcoming-value">${fmtDec(upcomingAmt)}</span></div>`:'';
+  const unpaid=sorted.filter(b=>!isBillPaid(currentMonthStr,b.name));
+  const paid=sorted.filter(b=>isBillPaid(currentMonthStr,b.name));
+  let html='';
+  if(unpaid.length){
+    html+=`<div class="bills-section-label">Unpaid</div><div class="section" style="margin:0 20px 12px;">`;
+    html+=unpaid.map(bill=>{
+      const isOverdue=bill.day<todayDay;const isToday=bill.day===todayDay;const isUpcoming=bill.day>todayDay&&bill.day<=todayDay+7;
+      let dayClass=isOverdue?'overdue':isToday?'today':isUpcoming?'upcoming':'future';
+      let statusText=isOverdue?`Overdue by ${todayDay-bill.day}d`:isToday?'Due today':isUpcoming?`Due in ${bill.day-todayDay}d`:`Due on ${ord(bill.day)}`;
+      let amtClass=isOverdue?'overdue':isUpcoming||isToday?'upcoming':'future';
+      return`<div class="bill-row"><div class="bill-day ${dayClass}">${bill.day}</div><div class="bill-dot" style="background:${bill.color}"></div><div class="bill-info"><div class="bill-name">${bill.name}</div><div class="bill-status">${statusText} · ${bill.cat}</div></div><div class="bill-amt ${amtClass}">${fmtDec(bill.amt)}</div><button onclick="toggleBillPaid('${currentMonthStr}','${bill.name}')" style="background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--muted2);font-size:11px;padding:4px 8px;cursor:pointer;font-family:'DM Sans',sans-serif;flex-shrink:0;">Mark paid</button></div>`;
+    }).join('');
+    html+=`</div>`;
+  }
+  if(paid.length){
+    html+=`<div class="bills-section-label">Paid this month</div><div class="section" style="margin:0 20px 12px;">`;
+    html+=paid.map(bill=>`<div class="bill-row"><div class="bill-day future">${bill.day}</div><div class="bill-dot" style="background:${bill.color}"></div><div class="bill-info"><div class="bill-name" style="color:var(--muted2)">${bill.name}</div><div class="bill-status">Paid · ${bill.cat}</div></div><div class="bill-amt paid">${fmtDec(bill.amt)}</div><button onclick="toggleBillPaid('${currentMonthStr}','${bill.name}')" style="background:var(--accent-dim);border:1px solid rgba(200,240,102,0.2);border-radius:8px;color:var(--accent);font-size:11px;padding:4px 8px;cursor:pointer;font-family:'DM Sans',sans-serif;flex-shrink:0;">✓ Paid</button></div>`).join('');
+    html+=`</div>`;
+  }
+  document.getElementById('bills-list').innerHTML=html;
+}
+function renderSubs(){
+  const total=state.subs.reduce((s,sub)=>s+sub.amt,0);const after=state.subs.filter(s=>s.status!=='cancel').reduce((s,sub)=>s+sub.amt,0);
+  document.getElementById('subs-summary').innerHTML=`<div class="card"><div class="card-label">Current total</div><div class="card-value">${fmtDec(total)}/mo</div></div><div class="card accent-card"><div class="card-label">After cancels</div><div class="card-value green">${fmtDec(after)}/mo</div></div>`;
+  const sorted=[...state.subs].sort((a,b)=>{const o={cancel:0,audit:1,keep:2};return o[a.status]-o[b.status]||b.amt-a.amt;});
+  document.getElementById('subs-list').innerHTML=sorted.map(sub=>{const i=state.subs.indexOf(sub);return`<div class="sub-row"><div class="sub-dot" style="background:${sub.color}"></div><div class="sub-name"><div class="sub-name-text">${sub.name}</div><div class="sub-name-note">${sub.note}</div></div><span class="sub-amt">${fmtDec(sub.amt)}</span><button class="status-pill pill-${sub.status}" onclick="cycleSub(${i})">${sub.status}</button></div>`;}).join('');
+}
+function cycleSub(i){const o=['keep','cancel','audit'];state.subs[i].status=o[(o.indexOf(state.subs[i].status)+1)%o.length];persist();renderSubs();}
+renderMonthBar();switchView(state.view);
+</script>
+</body>
+</html>
